@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EzTax — Portal Konsultan Pajak</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal:#0F766E;--teal-mid:#14B8A6;--teal-light:#CCFBF1;--teal-pale:#F0FDFA;
+  --navy:#0F172A;--navy-mid:#1E293B;--slate:#475569;--slate-light:#94A3B8;
+  --gray-100:#F1F5F9;--gray-200:#E2E8F0;--gray-300:#CBD5E1;
+  --amber:#D97706;--amber-light:#FEF3C7;
+  --blue:#2563EB;--blue-light:#EFF6FF;
+  --rose:#E11D48;--rose-light:#FFF1F2;
+  --green:#16A34A;--green-light:#F0FDF4;
+  --gold:#F59E0B;--white:#FFFFFF;
+  --radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-xl:24px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg:0 12px 32px rgba(0,0,0,0.10);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:#F8FAFC;color:var(--navy);min-height:100vh;font-size:15px;}
+h1,h2,h3,h4{font-family:'Sora',sans-serif;}
+
+/* NAV */
+nav{background:var(--white);border-bottom:1px solid var(--gray-200);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:62px;position:sticky;top:0;z-index:300;box-shadow:var(--shadow-sm);}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer;}
+.logo-mark{width:34px;height:34px;background:var(--teal);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:800;font-size:13px;color:white;}
+.logo-text{font-family:'Sora',sans-serif;font-weight:700;font-size:1.2rem;color:var(--navy);}
+.logo-text span{color:var(--teal-mid);}
+.logo-badge{background:var(--amber-light);color:var(--amber);font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:999px;margin-left:4px;}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.notif-btn{width:34px;height:34px;border-radius:50%;border:none;background:var(--gray-100);cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.notif-dot{width:7px;height:7px;background:var(--rose);border-radius:50%;position:absolute;top:7px;right:7px;border:1.5px solid white;}
+.avatar-nav{width:34px;height:34px;border-radius:50%;background:var(--teal);color:white;border:none;cursor:pointer;font-family:'Sora',sans-serif;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;}
+.status-toggle{display:flex;align-items:center;gap:6px;font-size:0.78rem;font-weight:600;color:var(--slate);cursor:pointer;}
+.toggle{width:36px;height:20px;background:#22C55E;border-radius:999px;position:relative;transition:background 0.2s;}
+.toggle.off{background:var(--gray-300);}
+.toggle::after{content:'';width:16px;height:16px;background:white;border-radius:50%;position:absolute;top:2px;left:2px;transition:left 0.2s;}
+.toggle:not(.off)::after{left:18px;}
+
+/* LAYOUT */
+.app-layout{display:flex;min-height:calc(100vh - 62px);}
+.sidebar{width:220px;background:var(--white);border-right:1px solid var(--gray-200);padding:1.25rem 0;flex-shrink:0;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto;}
+.sidebar-section{padding:0 0.75rem;margin-bottom:1.5rem;}
+.sidebar-label{font-size:0.68rem;font-weight:700;color:var(--slate-light);text-transform:uppercase;letter-spacing:1px;padding:0 0.75rem;margin-bottom:0.5rem;}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-sm);cursor:pointer;font-size:0.875rem;font-weight:500;color:var(--slate);transition:all 0.15s;border:none;background:none;width:100%;text-align:left;font-family:inherit;}
+.sidebar-item:hover{background:var(--gray-100);color:var(--navy);}
+.sidebar-item.active{background:var(--teal-pale);color:var(--teal);font-weight:600;}
+.sidebar-item .icon{font-size:1rem;flex-shrink:0;}
+.sidebar-badge{margin-left:auto;background:var(--rose);color:white;font-size:0.65rem;font-weight:700;padding:1px 6px;border-radius:999px;}
+.sidebar-badge.green{background:var(--teal);}
+.main{flex:1;padding:2rem;overflow-x:hidden;}
+
+/* PAGES */
+.page{display:none;animation:fadeIn 0.2s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* LOGIN PAGE */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--navy) 0%,#134E4A 100%);padding:2rem;}
+.auth-card{background:white;border-radius:var(--radius-xl);padding:2.5rem;width:100%;max-width:420px;box-shadow:var(--shadow-lg);}
+.auth-card h2{font-size:1.4rem;font-weight:800;margin-bottom:4px;}
+.auth-card p{color:var(--slate);font-size:0.875rem;margin-bottom:1.5rem;}
+.form-group{margin-bottom:1.1rem;}
+.form-group label{display:block;font-size:0.84rem;font-weight:600;margin-bottom:5px;}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 13px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;font-size:0.875rem;color:var(--navy);outline:none;transition:border-color 0.18s;background:white;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--teal);}
+.form-group textarea{resize:vertical;min-height:80px;}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+@media(max-width:580px){.input-row{grid-template-columns:1fr;}}
+
+/* BUTTONS */
+.btn{padding:9px 18px;border-radius:var(--radius-sm);font-size:0.875rem;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all 0.18s;display:inline-flex;align-items:center;gap:6px;}
+.btn-sm{padding:6px 13px;font-size:0.8rem;}
+.btn-xs{padding:4px 10px;font-size:0.75rem;}
+.btn-primary{background:var(--teal);color:white;}
+.btn-primary:hover{background:var(--teal-mid);}
+.btn-outline{background:white;border:1.5px solid var(--gray-200);color:var(--slate);}
+.btn-outline:hover{border-color:var(--teal);color:var(--teal);}
+.btn-danger{background:var(--rose-light);color:var(--rose);border:1.5px solid #FCA5A5;}
+.btn-danger:hover{background:#FEE2E2;}
+.btn-amber{background:var(--amber-light);color:var(--amber);border:1.5px solid #FDE68A;}
+.btn-green{background:var(--green-light);color:var(--green);border:1.5px solid #BBF7D0;}
+.btn-full{width:100%;}
+.btn-row{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem;flex-wrap:wrap;}
+
+/* CARDS */
+.card{background:white;border-radius:var(--radius-lg);padding:1.5rem;border:1px solid var(--gray-200);box-shadow:var(--shadow-sm);}
+.card-title{font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.card-title-left{display:flex;align-items:center;gap:8px;}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem;}
+.stat-card{background:white;border-radius:var(--radius-md);padding:1.25rem;border:1px solid var(--gray-200);}
+.stat-label{font-size:0.72rem;color:var(--slate);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;}
+.stat-value{font-family:'Sora',sans-serif;font-size:1.6rem;font-weight:800;}
+.stat-sub{font-size:0.72rem;color:var(--slate);margin-top:2px;}
+.stat-trend{font-size:0.72rem;font-weight:600;margin-top:4px;}
+.trend-up{color:var(--green);}
+.trend-down{color:var(--rose);}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:0.85rem;}
+thead th{background:var(--gray-100);padding:10px 14px;text-align:left;font-weight:600;font-size:0.78rem;color:var(--slate);border-bottom:2px solid var(--gray-200);white-space:nowrap;}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--gray-100);vertical-align:middle;}
+tbody tr:hover td{background:var(--gray-100);}
+tbody tr:last-child td{border:none;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:0.72rem;font-weight:700;}
+.badge-active{background:var(--teal-light);color:var(--teal);}
+.badge-pending{background:var(--amber-light);color:var(--amber);}
+.badge-done{background:var(--green-light);color:var(--green);}
+.badge-cancel{background:var(--rose-light);color:var(--rose);}
+.badge-blue{background:var(--blue-light);color:var(--blue);}
+.online-dot{width:7px;height:7px;border-radius:50%;background:#22C55E;display:inline-block;}
+.offline-dot{width:7px;height:7px;border-radius:50%;background:var(--slate-light);display:inline-block;}
+
+/* ALERT */
+.alert{padding:11px 15px;border-radius:var(--radius-sm);font-size:0.84rem;line-height:1.6;margin-bottom:1.25rem;display:flex;gap:8px;align-items:flex-start;}
+.alert-info{background:var(--blue-light);border:1px solid #BFDBFE;color:#1E40AF;}
+.alert-warn{background:var(--amber-light);border:1px solid #FDE68A;color:#92400E;}
+.alert-success{background:var(--green-light);border:1px solid #BBF7D0;color:#14532D;}
+
+/* PROFILE CARD */
+.profile-banner{background:linear-gradient(135deg,var(--navy),#134E4A);border-radius:var(--radius-lg);padding:2rem;color:white;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
+.profile-avatar{width:72px;height:72px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-weight:800;font-size:1.5rem;color:white;border:3px solid rgba(255,255,255,0.3);flex-shrink:0;}
+.profile-info h2{font-size:1.2rem;font-weight:800;margin-bottom:2px;}
+.profile-info p{font-size:0.8rem;opacity:0.75;margin-bottom:8px;}
+.profile-meta{display:flex;gap:14px;flex-wrap:wrap;}
+.profile-meta span{font-size:0.78rem;opacity:0.85;display:flex;align-items:center;gap:4px;}
+
+/* SESI CARD */
+.sesi-item{padding:1rem 1.25rem;border-radius:var(--radius-md);border:1px solid var(--gray-200);display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;background:white;flex-wrap:wrap;transition:all 0.15s;}
+.sesi-item:hover{border-color:var(--teal-mid);box-shadow:var(--shadow-sm);}
+.sesi-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:0.95rem;flex-shrink:0;}
+.sesi-info h4{font-size:0.875rem;font-weight:700;}
+.sesi-info p{font-size:0.78rem;color:var(--slate);margin-top:2px;}
+.sesi-right{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
+
+/* CHAT */
+.chat-wrap{display:flex;height:440px;border-radius:var(--radius-lg);border:1px solid var(--gray-200);overflow:hidden;background:white;}
+.chat-sidebar{width:220px;border-right:1px solid var(--gray-200);overflow-y:auto;flex-shrink:0;}
+.chat-contact{padding:12px;border-bottom:1px solid var(--gray-100);cursor:pointer;display:flex;gap:10px;align-items:center;transition:background 0.15s;}
+.chat-contact:hover,.chat-contact.active{background:var(--teal-pale);}
+.chat-contact-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:0.85rem;flex-shrink:0;}
+.chat-contact-info h5{font-size:0.8rem;font-weight:600;}
+.chat-contact-info p{font-size:0.72rem;color:var(--slate);}
+.chat-contact-badge{margin-left:auto;background:var(--teal);color:white;font-size:0.65rem;font-weight:700;padding:1px 6px;border-radius:999px;}
+.chat-main{flex:1;display:flex;flex-direction:column;}
+.chat-header{padding:12px 16px;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;gap:10px;background:var(--teal-pale);}
+.chat-header-av{width:34px;height:34px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:0.85rem;}
+.chat-header-info h4{font-size:0.875rem;font-weight:700;}
+.chat-header-info p{font-size:0.72rem;color:var(--teal);}
+.chat-header-right{margin-left:auto;display:flex;gap:6px;}
+.chat-msgs{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:10px;}
+.msg{max-width:70%;padding:9px 13px;border-radius:var(--radius-md);font-size:0.85rem;line-height:1.55;}
+.msg-them{background:var(--gray-100);color:var(--navy);align-self:flex-start;border-radius:4px var(--radius-md) var(--radius-md) var(--radius-md);}
+.msg-me{background:var(--teal);color:white;align-self:flex-end;border-radius:var(--radius-md) 4px var(--radius-md) var(--radius-md);}
+.msg-time{font-size:0.62rem;opacity:0.6;margin-top:3px;display:block;}
+.chat-input-row{padding:10px;border-top:1px solid var(--gray-200);display:flex;gap:8px;}
+.chat-input{flex:1;padding:9px 13px;border:1.5px solid var(--gray-200);border-radius:var(--radius-md);font-family:inherit;font-size:0.875rem;outline:none;}
+.chat-input:focus{border-color:var(--teal);}
+.chat-send{width:36px;height:36px;border-radius:50%;background:var(--teal);border:none;cursor:pointer;color:white;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* DAFTAR FORM STEPS */
+.reg-steps{display:flex;margin-bottom:2rem;background:white;border-radius:var(--radius-lg);border:1px solid var(--gray-200);overflow:hidden;}
+.reg-step{flex:1;padding:12px 8px;text-align:center;font-size:0.78rem;font-weight:600;color:var(--slate);border-right:1px solid var(--gray-200);cursor:default;}
+.reg-step:last-child{border:none;}
+.reg-step.active{background:var(--teal);color:white;}
+.reg-step.done{background:var(--teal-light);color:var(--teal);}
+
+/* EARNINGS */
+.earn-bar{background:var(--gray-200);border-radius:999px;height:8px;margin-top:6px;}
+.earn-fill{height:100%;border-radius:999px;background:var(--teal);}
+
+/* REVIEW */
+.review-item{padding:1rem 0;border-bottom:1px solid var(--gray-100);}
+.review-item:last-child{border:none;}
+.review-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.review-name{font-size:0.875rem;font-weight:600;}
+.review-stars{color:var(--gold);font-size:0.85rem;}
+.review-text{font-size:0.82rem;color:var(--slate);line-height:1.6;}
+
+/* SCHEDULE */
+.schedule-day{margin-bottom:1.25rem;}
+.schedule-day h4{font-size:0.8rem;font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;}
+.schedule-slot{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid var(--gray-200);margin-bottom:6px;background:white;}
+.slot-time{font-size:0.8rem;font-weight:600;color:var(--navy);min-width:100px;}
+.slot-client{font-size:0.82rem;color:var(--slate);flex:1;}
+.slot-paket{font-size:0.72rem;padding:2px 8px;border-radius:999px;font-weight:600;}
+
+/* NOTIF DROPDOWN */
+.notif-drop{display:none;position:fixed;top:68px;right:16px;width:300px;background:white;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);border:1px solid var(--gray-200);z-index:400;}
+.notif-drop.open{display:block;animation:fadeIn 0.18s ease;}
+.notif-dh{padding:12px 16px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between;}
+.notif-dh h4{font-size:0.875rem;font-weight:700;}
+.nd-item{padding:11px 16px;border-bottom:1px solid var(--gray-100);display:flex;gap:10px;cursor:pointer;}
+.nd-item:hover{background:var(--gray-100);}
+.nd-item:last-child{border:none;}
+.nd-icon{font-size:1.1rem;flex-shrink:0;}
+.nd-text h5{font-size:0.78rem;font-weight:600;}
+.nd-text p{font-size:0.72rem;color:var(--slate);margin-top:1px;}
+
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--gray-100);margin:1.25rem 0;}
+
+/* MOBILE responsive */
+@media(max-width:768px){
+  .sidebar{display:none;}
+  .sidebar.mobile-open{display:block;position:fixed;top:62px;left:0;bottom:0;z-index:200;width:220px;}
+  .main{padding:1rem;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .chat-wrap{flex-direction:column;height:auto;}
+  .chat-sidebar{width:100%;height:160px;border-right:none;border-bottom:1px solid var(--gray-200);}
+  .hamburger{display:flex!important;}
+}
+.hamburger{display:none;align-items:center;justify-content:center;width:34px;height:34px;border:none;background:var(--gray-100);border-radius:var(--radius-sm);cursor:pointer;font-size:1.1rem;}
+</style>
+</head>
+<body>
+
+<!-- ====== LOGIN ====== -->
+<div id="login-screen">
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;">
+      <div class="logo-mark">Ez</div>
+      <span class="logo-text">Ez<span>Tax</span></span>
+      <span class="logo-badge">Konsultan</span>
+    </div>
+    <h2>Masuk sebagai Konsultan</h2>
+    <p>Akses dashboard dan kelola sesi konsultasi Anda</p>
+    <div class="alert alert-info">ℹ️ Demo: klik masuk langsung untuk menjelajahi dashboard.</div>
+    <div class="form-group"><label>Email Profesional</label><input type="email" value="ardi@konsultan.com" placeholder="email@domain.com"></div>
+    <div class="form-group"><label>Password</label><input type="password" value="12345678" placeholder="Password Anda"></div>
+    <button class="btn btn-primary btn-full" style="margin-top:0.5rem;" onclick="doLogin()">Masuk ke Dashboard</button>
+    <div class="divider"></div>
+    <p style="text-align:center;font-size:0.84rem;color:var(--slate);">Belum terdaftar? <a onclick="showReg()" style="color:var(--teal);font-weight:600;cursor:pointer;">Daftar sebagai konsultan</a></p>
+    <p style="text-align:center;font-size:0.84rem;color:var(--slate);margin-top:6px;">Wajib pajak? <a href="index.html" style="color:var(--teal);font-weight:600;">Ke halaman pengguna</a></p>
+  </div>
+</div>
+</div>
+
+<!-- ====== REGISTER ====== -->
+<div id="reg-screen" style="display:none;">
+<div class="auth-wrap">
+  <div class="auth-card" style="max-width:520px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;">
+      <div class="logo-mark">Ez</div>
+      <span class="logo-text">Ez<span>Tax</span></span>
+      <span class="logo-badge">Daftar Konsultan</span>
+    </div>
+    <div class="reg-steps" id="reg-steps">
+      <div class="reg-step active" id="rs1">1. Profil</div>
+      <div class="reg-step" id="rs2">2. Sertifikasi</div>
+      <div class="reg-step" id="rs3">3. Paket</div>
+      <div class="reg-step" id="rs4">4. Pembayaran</div>
+    </div>
+
+    <!-- Step 1 -->
+    <div id="reg1">
+      <h2 style="font-size:1.2rem;margin-bottom:4px;">Informasi Profil</h2>
+      <p style="color:var(--slate);font-size:0.84rem;margin-bottom:1.25rem;">Data ini akan tampil di profil publik Anda</p>
+      <div class="input-row">
+        <div class="form-group"><label>Nama Lengkap + Gelar</label><input type="text" placeholder="Ardi Rahman, S.E., BKP"></div>
+        <div class="form-group"><label>NPWP Konsultan</label><input type="text" placeholder="XX.XXX.XXX.X-XXX.XXX"></div>
+      </div>
+      <div class="input-row">
+        <div class="form-group"><label>Email Profesional</label><input type="email" placeholder="email@domain.com"></div>
+        <div class="form-group"><label>No. HP / WhatsApp</label><input type="text" placeholder="08XXXXXXXXXX"></div>
+      </div>
+      <div class="form-group"><label>Spesialisasi Utama</label>
+        <select><option>PPh Orang Pribadi</option><option>PPh Badan</option><option>UMKM & PPh Final</option><option>PPN</option><option>Pajak Internasional</option><option>Sengketa & Keberatan Pajak</option></select>
+      </div>
+      <div class="form-group"><label>Bio Singkat</label><textarea placeholder="Ceritakan pengalaman dan keahlian Anda..."></textarea></div>
+      <div class="form-group"><label>Password</label><input type="password" placeholder="Minimal 8 karakter"></div>
+      <div class="btn-row"><button class="btn btn-primary" onclick="regStep(2)">Lanjut →</button></div>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="reg2" style="display:none;">
+      <h2 style="font-size:1.2rem;margin-bottom:4px;">Sertifikasi & Dokumen</h2>
+      <p style="color:var(--slate);font-size:0.84rem;margin-bottom:1.25rem;">Tim EzTax akan verifikasi dalam 1–3 hari kerja</p>
+      <div class="alert alert-warn">⚠️ Minimal Brevet B diperlukan untuk bergabung sebagai konsultan aktif.</div>
+      <div class="input-row">
+        <div class="form-group"><label>Tingkat Brevet</label><select><option>Brevet A</option><option selected>Brevet B</option><option>Brevet C</option></select></div>
+        <div class="form-group"><label>Lembaga Penerbit</label><input type="text" placeholder="IKPI / IAI"></div>
+      </div>
+      <div class="input-row">
+        <div class="form-group"><label>Tahun Sertifikasi</label><input type="number" placeholder="2020"></div>
+        <div class="form-group"><label>Pengalaman (tahun)</label><input type="number" placeholder="5"></div>
+      </div>
+      <div class="form-group"><label>No. Izin Praktik (opsional)</label><input type="text" placeholder="Nomor STTD / KPP"></div>
+      <div class="form-group"><label>Upload Sertifikat (PDF/JPG)</label><input type="file" accept=".pdf,.jpg,.png"></div>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="regStep(1)">← Kembali</button>
+        <button class="btn btn-primary" onclick="regStep(3)">Lanjut →</button>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div id="reg3" style="display:none;">
+      <h2 style="font-size:1.2rem;margin-bottom:4px;">Pilih Paket Layanan</h2>
+      <p style="color:var(--slate);font-size:0.84rem;margin-bottom:1.25rem;">Pilih paket yang ingin Anda tawarkan kepada klien</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1.25rem;">
+        <label style="display:flex;align-items:center;gap:12px;padding:13px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);cursor:pointer;">
+          <input type="checkbox" checked>
+          <div><strong>Tanya Cepat (Basic)</strong> — Rp 50.000/sesi<br><span style="font-size:0.78rem;color:var(--slate);">Anda terima Rp 45.000 (komisi platform 10%)</span></div>
+        </label>
+        <label style="display:flex;align-items:center;gap:12px;padding:13px;border:1.5px solid var(--teal);background:var(--teal-pale);border-radius:var(--radius-sm);cursor:pointer;">
+          <input type="checkbox" checked>
+          <div><strong>Konsultasi Lengkap (Standard)</strong> — Rp 150.000/sesi<br><span style="font-size:0.78rem;color:var(--slate);">Anda terima Rp 135.000 (komisi platform 10%)</span></div>
+        </label>
+        <label style="display:flex;align-items:center;gap:12px;padding:13px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);cursor:pointer;">
+          <input type="checkbox">
+          <div><strong>Pendampingan Penuh (Premium)</strong> — Rp 350.000/sesi<br><span style="font-size:0.78rem;color:var(--slate);">Anda terima Rp 315.000 (komisi platform 10%)</span></div>
+        </label>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="regStep(2)">← Kembali</button>
+        <button class="btn btn-primary" onclick="regStep(4)">Lanjut →</button>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div id="reg4" style="display:none;">
+      <h2 style="font-size:1.2rem;margin-bottom:4px;">Pembayaran Listing Fee</h2>
+      <p style="color:var(--slate);font-size:0.84rem;margin-bottom:1.25rem;">Profil aktif setelah pembayaran & verifikasi selesai</p>
+      <div style="background:var(--gray-100);border-radius:var(--radius-md);padding:1.25rem;margin-bottom:1.25rem;">
+        <div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:6px;"><span>Listing Fee (1 bulan)</span><span style="font-weight:700;">Rp 299.000</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:6px;color:var(--slate);"><span>PPN 11%</span><span>Rp 32.890</span></div>
+        <div class="divider" style="margin:10px 0;"></div>
+        <div style="display:flex;justify-content:space-between;font-size:1rem;font-weight:800;"><span>Total</span><span style="color:var(--teal);">Rp 331.890</span></div>
+      </div>
+      <div class="form-group"><label>Metode Pembayaran</label>
+        <select><option>QRIS (Scan & Bayar)</option><option>Transfer BCA</option><option>Transfer BRI</option><option>Transfer Mandiri</option></select>
+      </div>
+      <div style="background:var(--teal-pale);border:1px solid var(--teal-light);border-radius:var(--radius-md);padding:1.25rem;text-align:center;margin-bottom:1.25rem;">
+        <div style="font-size:0.78rem;color:var(--teal);font-weight:600;margin-bottom:8px;">Contoh QRIS (Simulasi)</div>
+        <div style="width:80px;height:80px;background:var(--gray-200);border-radius:var(--radius-sm);margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:var(--slate);text-align:center;">[QRIS Demo]</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="regStep(3)">← Kembali</button>
+        <button class="btn btn-primary" onclick="finishReg()">✅ Konfirmasi Pembayaran</button>
+      </div>
+    </div>
+
+    <p style="text-align:center;font-size:0.84rem;color:var(--slate);margin-top:1rem;">Sudah punya akun? <a onclick="showLogin()" style="color:var(--teal);font-weight:600;cursor:pointer;">Masuk</a></p>
+  </div>
+</div>
+</div>
+
+<!-- ====== MAIN APP ====== -->
+<div id="main-app" style="display:none;">
+
+<nav>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()">☰</button>
+    <div class="logo" onclick="showPage('dashboard')">
+      <div class="logo-mark">Ez</div>
+      <span class="logo-text">Ez<span>Tax</span></span>
+      <span class="logo-badge">Konsultan</span>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="status-toggle" onclick="toggleOnline()" title="Toggle status online">
+      <div class="toggle" id="online-toggle"></div>
+      <span id="online-label">Online</span>
+    </div>
+    <button class="notif-btn" onclick="toggleNotif()">🔔<span class="notif-dot"></span></button>
+    <div class="avatar-nav" onclick="showPage('profil')">AR</div>
+  </div>
+</nav>
+
+<!-- NOTIF -->
+<div class="notif-drop" id="notif-drop">
+  <div class="notif-dh"><h4>🔔 Notifikasi</h4><button onclick="toggleNotif()" style="background:none;border:none;cursor:pointer;color:var(--slate);">✕</button></div>
+  <div class="nd-item"><div class="nd-icon">📅</div><div class="nd-text"><h5>Booking baru masuk</h5><p>Budi Santoso — Standard • 14:00 hari ini</p></div></div>
+  <div class="nd-item"><div class="nd-icon">⭐</div><div class="nd-text"><h5>Ulasan baru dari klien</h5><p>Rina M. memberikan bintang 5</p></div></div>
+  <div class="nd-item"><div class="nd-icon">💰</div><div class="nd-text"><h5>Pembayaran diterima</h5><p>Rp 135.000 dari sesi Standard</p></div></div>
+  <div class="nd-item"><div class="nd-icon">⚠️</div><div class="nd-text"><h5>Listing berakhir 7 hari lagi</h5><p>Perpanjang sebelum 1 April 2025</p></div></div>
+</div>
+
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Utama</div>
+      <button class="sidebar-item active" id="sb-dashboard" onclick="showPage('dashboard')"><span class="icon">📊</span> Dashboard</button>
+      <button class="sidebar-item" id="sb-jadwal" onclick="showPage('jadwal')"><span class="icon">📅</span> Jadwal Sesi <span class="sidebar-badge">3</span></button>
+      <button class="sidebar-item" id="sb-chat" onclick="showPage('chat')"><span class="icon">💬</span> Pesan <span class="sidebar-badge">2</span></button>
+      <button class="sidebar-item" id="sb-klien" onclick="showPage('klien')"><span class="icon">👥</span> Daftar Klien</button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Keuangan</div>
+      <button class="sidebar-item" id="sb-pendapatan" onclick="showPage('pendapatan')"><span class="icon">💰</span> Pendapatan</button>
+      <button class="sidebar-item" id="sb-listing" onclick="showPage('listing')"><span class="icon">🏷️</span> Status Listing</button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Akun</div>
+      <button class="sidebar-item" id="sb-profil" onclick="showPage('profil')"><span class="icon">👤</span> Profil Saya</button>
+      <button class="sidebar-item" id="sb-ulasan" onclick="showPage('ulasan')"><span class="icon">⭐</span> Ulasan Klien</button>
+      <button class="sidebar-item" onclick="doLogout()"><span class="icon">🚪</span> Keluar</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="main">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="page active" id="page-dashboard">
+      <div style="margin-bottom:1.5rem;">
+        <h2 style="font-size:1.3rem;font-weight:800;">Selamat datang, Ardi! 👋</h2>
+        <p style="color:var(--slate);font-size:0.875rem;">Selasa, 18 Maret 2025 &nbsp;|&nbsp; <span style="color:#22C55E;font-weight:600;">● Online</span></p>
+      </div>
+
+      <div class="alert alert-warn">⚠️ <strong>Listing Anda berakhir dalam 7 hari.</strong> Perpanjang sekarang agar profil tetap tayang. <a onclick="showPage('listing')" style="color:var(--amber);font-weight:700;cursor:pointer;margin-left:6px;">Perpanjang →</a></div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Sesi Bulan Ini</div>
+          <div class="stat-value" style="color:var(--teal);">12</div>
+          <div class="stat-sub">Target 20 sesi</div>
+          <div class="earn-bar"><div class="earn-fill" style="width:60%"></div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pendapatan Bersih</div>
+          <div class="stat-value" style="color:var(--navy);">Rp 1,8jt</div>
+          <div class="stat-sub">Setelah komisi 10%</div>
+          <div class="stat-trend trend-up">↑ 23% dari bulan lalu</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Rating Rata-rata</div>
+          <div class="stat-value" style="color:var(--gold);">4.9 ★</div>
+          <div class="stat-sub">Dari 128 ulasan</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Antrian Booking</div>
+          <div class="stat-value" style="color:var(--amber);">3</div>
+          <div class="stat-sub">Menunggu konfirmasi</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Sesi Selesai</div>
+          <div class="stat-value" style="color:var(--blue);">247</div>
+          <div class="stat-sub">Sejak bergabung</div>
+        </div>
+      </div>
+
+      <!-- Sesi Hari Ini -->
+      <div class="card" style="margin-bottom:1.5rem;">
+        <div class="card-title">
+          <div class="card-title-left">📋 Sesi Hari Ini</div>
+          <button class="btn btn-outline btn-xs" onclick="showPage('jadwal')">Lihat Semua</button>
+        </div>
+        <div class="sesi-item">
+          <div class="sesi-avatar" style="background:#2563EB;">BS</div>
+          <div class="sesi-info">
+            <h4>Budi Santoso</h4>
+            <p>Standard • PPh Orang Pribadi • 14:00–15:00</p>
+          </div>
+          <div class="sesi-right">
+            <span class="badge badge-active">Sedang Berjalan</span>
+            <button class="btn btn-primary btn-xs" onclick="showPage('chat')">Masuk Ruang →</button>
+          </div>
+        </div>
+        <div class="sesi-item">
+          <div class="sesi-avatar" style="background:#DC2626;">DW</div>
+          <div class="sesi-info">
+            <h4>Dewi Wulandari</h4>
+            <p>Basic • UMKM PPh Final • 16:00–16:30</p>
+          </div>
+          <div class="sesi-right">
+            <span class="badge badge-pending">Menunggu</span>
+            <div style="display:flex;gap:4px;">
+              <button class="btn btn-green btn-xs">Konfirmasi</button>
+              <button class="btn btn-danger btn-xs">Tolak</button>
+            </div>
+          </div>
+        </div>
+        <div class="sesi-item">
+          <div class="sesi-avatar" style="background:#7C3AED;">RH</div>
+          <div class="sesi-info">
+            <h4>Rizal Hakim</h4>
+            <p>Premium • SPT Tahunan Lengkap • 18:00–20:00</p>
+          </div>
+          <div class="sesi-right">
+            <span class="badge badge-pending">Menunggu</span>
+            <div style="display:flex;gap:4px;">
+              <button class="btn btn-green btn-xs">Konfirmasi</button>
+              <button class="btn btn-danger btn-xs">Tolak</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+        <div class="card">
+          <div class="card-title"><div class="card-title-left">📈 Performa Minggu Ini</div></div>
+          <div style="font-size:0.85rem;display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;"><span style="color:var(--slate);">Sesi selesai</span><strong>7 sesi</strong></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;"><span style="color:var(--slate);">Pendapatan</span><strong style="color:var(--teal);">Rp 765.000</strong></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;"><span style="color:var(--slate);">Waktu respons rata-rata</span><strong>18 menit</strong></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;"><span style="color:var(--slate);">Tingkat kepuasan</span><strong style="color:var(--gold);">4.9/5 ★</strong></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><div class="card-title-left">🔗 Link Cepat</div></div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <a href="https://coretax.pajak.go.id" target="_blank" style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--blue-light);border:1px solid #BFDBFE;border-radius:var(--radius-sm);font-size:0.8rem;font-weight:600;color:var(--blue);text-decoration:none;">Coretax DJP <span>↗</span></a>
+            <a href="https://www.pajak.go.id/id/peraturan-pajak" target="_blank" style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--blue-light);border:1px solid #BFDBFE;border-radius:var(--radius-sm);font-size:0.8rem;font-weight:600;color:var(--blue);text-decoration:none;">Peraturan Pajak DJP <span>↗</span></a>
+            <a href="https://www.pajak.go.id/id/tarif-pajak" target="_blank" style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--blue-light);border:1px solid #BFDBFE;border-radius:var(--radius-sm);font-size:0.8rem;font-weight:600;color:var(--blue);text-decoration:none;">Tabel Tarif Pajak <span>↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== JADWAL ===== -->
+    <div class="page" id="page-jadwal">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+        <div><h2 style="font-size:1.3rem;font-weight:800;">Jadwal Sesi</h2><p style="color:var(--slate);font-size:0.875rem;">Kelola semua jadwal konsultasi Anda</p></div>
+        <div style="display:flex;gap:8px;">
+          <select style="padding:8px 12px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;font-size:0.875rem;outline:none;">
+            <option>Semua Status</option><option>Menunggu</option><option>Aktif</option><option>Selesai</option><option>Dibatalkan</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="schedule-day">
+        <h4>Hari Ini — Selasa, 18 Maret 2025</h4>
+        <div class="schedule-slot"><div class="slot-time">14:00 – 15:00</div><div class="slot-client"><strong>Budi Santoso</strong> — PPh Orang Pribadi</div><span class="slot-paket badge badge-active">Standard</span><div style="margin-left:auto;display:flex;gap:6px;"><button class="btn btn-primary btn-xs" onclick="showPage('chat')">Masuk</button></div></div>
+        <div class="schedule-slot"><div class="slot-time">16:00 – 16:30</div><div class="slot-client"><strong>Dewi Wulandari</strong> — PPh Final UMKM</div><span class="slot-paket badge badge-pending">Basic</span><div style="margin-left:auto;display:flex;gap:6px;"><button class="btn btn-green btn-xs">Konfirmasi</button><button class="btn btn-danger btn-xs">Tolak</button></div></div>
+        <div class="schedule-slot"><div class="slot-time">18:00 – 20:00</div><div class="slot-client"><strong>Rizal Hakim</strong> — SPT Tahunan Lengkap</div><span class="slot-paket" style="background:var(--rose-light);color:var(--rose);font-size:0.72rem;padding:2px 8px;border-radius:999px;font-weight:600;">Premium</span><div style="margin-left:auto;display:flex;gap:6px;"><button class="btn btn-green btn-xs">Konfirmasi</button><button class="btn btn-danger btn-xs">Tolak</button></div></div>
+      </div>
+
+      <div class="schedule-day">
+        <h4>Rabu, 19 Maret 2025</h4>
+        <div class="schedule-slot"><div class="slot-time">09:00 – 10:00</div><div class="slot-client"><strong>Siti Aminah</strong> — PPh 21 Karyawan</div><span class="slot-paket badge badge-active">Standard</span><div style="margin-left:auto;"><span class="badge badge-done">Dikonfirmasi</span></div></div>
+        <div class="schedule-slot"><div class="slot-time">13:00 – 13:30</div><div class="slot-client"><strong>Ferry Gunawan</strong> — NPWP & Registrasi</div><span class="slot-paket badge badge-blue">Basic</span><div style="margin-left:auto;"><span class="badge badge-done">Dikonfirmasi</span></div></div>
+      </div>
+
+      <div class="card" style="margin-top:1.5rem;">
+        <div class="card-title"><div class="card-title-left">📋 Riwayat Sesi Selesai</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Tanggal</th><th>Klien</th><th>Paket</th><th>Topik</th><th>Durasi</th><th>Pendapatan</th><th>Rating</th></tr></thead>
+            <tbody>
+              <tr><td>17 Mar 2025</td><td>Rina Mayasari</td><td><span class="badge badge-active">Standard</span></td><td>SPT Freelancer 1770</td><td>58 mnt</td><td>Rp 135.000</td><td>⭐⭐⭐⭐⭐</td></tr>
+              <tr><td>15 Mar 2025</td><td>Joko Prasetyo</td><td><span class="badge badge-blue">Basic</span></td><td>PTKP & Status TK/K</td><td>25 mnt</td><td>Rp 45.000</td><td>⭐⭐⭐⭐⭐</td></tr>
+              <tr><td>13 Mar 2025</td><td>PT Maju Jaya</td><td style="color:var(--rose);font-weight:600;">Premium</td><td>PPh Badan & Transfer Pricing</td><td>112 mnt</td><td>Rp 315.000</td><td>⭐⭐⭐⭐⭐</td></tr>
+              <tr><td>10 Mar 2025</td><td>Alya Fitria</td><td><span class="badge badge-active">Standard</span></td><td>Pengisian Coretax Pertama</td><td>60 mnt</td><td>Rp 135.000</td><td>⭐⭐⭐⭐</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CHAT ===== -->
+    <div class="page" id="page-chat">
+      <div style="margin-bottom:1.25rem;">
+        <h2 style="font-size:1.3rem;font-weight:800;">Ruang Konsultasi</h2>
+        <p style="color:var(--slate);font-size:0.875rem;">Sesi aktif dan pesan masuk</p>
+      </div>
+      <div class="chat-wrap">
+        <div class="chat-sidebar">
+          <div style="padding:10px 12px;border-bottom:1px solid var(--gray-100);font-size:0.78rem;font-weight:700;color:var(--slate);">SESI AKTIF</div>
+          <div class="chat-contact active" onclick="switchChat('BS','Budi Santoso','#2563EB','Standard — PPh OP')">
+            <div class="chat-contact-av" style="background:#2563EB;">BS</div>
+            <div class="chat-contact-info"><h5>Budi Santoso</h5><p>Standard • Aktif sekarang</p></div>
+            <span class="chat-contact-badge">2</span>
+          </div>
+          <div style="padding:10px 12px;border-bottom:1px solid var(--gray-100);font-size:0.78rem;font-weight:700;color:var(--slate);">RIWAYAT</div>
+          <div class="chat-contact" onclick="switchChat('RM','Rina Mayasari','#7C3AED','Standard — Freelancer')">
+            <div class="chat-contact-av" style="background:#7C3AED;">RM</div>
+            <div class="chat-contact-info"><h5>Rina Mayasari</h5><p>Selesai • 17 Mar</p></div>
+          </div>
+          <div class="chat-contact" onclick="switchChat('JP','Joko Prasetyo','#EA580C','Basic — PTKP')">
+            <div class="chat-contact-av" style="background:#EA580C;">JP</div>
+            <div class="chat-contact-info"><h5>Joko Prasetyo</h5><p>Selesai • 15 Mar</p></div>
+          </div>
+        </div>
+        <div class="chat-main">
+          <div class="chat-header">
+            <div class="chat-header-av" id="ch-av" style="background:#2563EB;">BS</div>
+            <div class="chat-header-info">
+              <h4 id="ch-name">Budi Santoso</h4>
+              <p id="ch-paket">🟢 Sedang berlangsung • Standard</p>
+            </div>
+            <div class="chat-header-right">
+              <a href="https://coretax.pajak.go.id" target="_blank" class="btn btn-outline btn-xs">🔗 Coretax ↗</a>
+              <button class="btn btn-danger btn-xs" onclick="alert('Sesi akan diakhiri.')">Akhiri Sesi</button>
+            </div>
+          </div>
+          <div style="padding:7px 14px;background:var(--amber-light);border-bottom:1px solid #FDE68A;font-size:0.75rem;color:#92400E;display:flex;align-items:center;gap:8px;">
+            ⏱️ Sisa waktu: <strong>47 menit</strong> &nbsp;|&nbsp; Upload dokumen tersedia pada paket ini
+          </div>
+          <div class="chat-msgs" id="chat-msgs">
+            <div class="msg msg-them">Halo Pak Ardi! Saya bingung soal formulir SPT, harus pakai 1770 atau 1770S ya?<span class="msg-time">14:02</span></div>
+            <div class="msg msg-me">Halo Pak Budi! Karena ada penghasilan freelance di samping gaji, Bapak harus pakai formulir 1770 ya, bukan 1770S. Di Coretax pilih SPT → Buat Baru → 1770.<span class="msg-time">14:03</span></div>
+            <div class="msg msg-them">Oh begitu, lalu bukti potong dari kantor saya masukkan di bagian mana?<span class="msg-time">14:05</span></div>
+            <div class="msg msg-me">Bukti potong 1721-A1 dimasukkan di bagian Penghasilan → Penghasilan dari Pekerjaan dalam Hubungan Kerja. Klik tombol "Tambah" lalu isi NPWP pemberi kerja dan jumlahnya.<span class="msg-time">14:06</span></div>
+          </div>
+          <div style="padding:6px 14px;background:var(--gray-100);border-top:1px solid var(--gray-200);display:flex;gap:6px;">
+            <button class="btn btn-outline btn-xs" onclick="alert('Upload dokumen (simulasi)')">📎 Upload Dok.</button>
+            <button class="btn btn-outline btn-xs">📋 Ringkasan Sesi</button>
+          </div>
+          <div class="chat-input-row">
+            <input class="chat-input" id="chat-inp" placeholder="Ketik balasan konsultasi..." onkeydown="if(event.key==='Enter')kirimChat()">
+            <button class="chat-send" onclick="kirimChat()">➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== KLIEN ===== -->
+    <div class="page" id="page-klien">
+      <div style="margin-bottom:1.5rem;">
+        <h2 style="font-size:1.3rem;font-weight:800;">Daftar Klien</h2>
+        <p style="color:var(--slate);font-size:0.875rem;">Semua pengguna yang pernah berkonsultasi dengan Anda</p>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-left">👥 Total 24 Klien</div>
+          <input type="text" placeholder="🔍 Cari nama klien..." style="padding:7px 12px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-family:inherit;font-size:0.84rem;outline:none;width:200px;">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Nama Klien</th><th>Jenis WP</th><th>Total Sesi</th><th>Terakhir</th><th>Status</th><th>Aksi</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Budi Santoso</strong><br><span style="font-size:0.75rem;color:var(--slate);">budi@email.com</span></td><td>Karyawan</td><td>1</td><td>Hari ini</td><td><span class="badge badge-active">Aktif</span></td><td><button class="btn btn-outline btn-xs" onclick="showPage('chat')">Chat</button></td></tr>
+              <tr><td><strong>Rina Mayasari</strong><br><span style="font-size:0.75rem;color:var(--slate);">rina@email.com</span></td><td>Freelancer</td><td>3</td><td>17 Mar 2025</td><td><span class="badge badge-done">Selesai</span></td><td><button class="btn btn-outline btn-xs">Riwayat</button></td></tr>
+              <tr><td><strong>Joko Prasetyo</strong><br><span style="font-size:0.75rem;color:var(--slate);">joko@email.com</span></td><td>Karyawan</td><td>1</td><td>15 Mar 2025</td><td><span class="badge badge-done">Selesai</span></td><td><button class="btn btn-outline btn-xs">Riwayat</button></td></tr>
+              <tr><td><strong>PT Maju Jaya</strong><br><span style="font-size:0.75rem;color:var(--slate);">finance@majujaya.com</span></td><td>Badan Usaha</td><td>5</td><td>13 Mar 2025</td><td><span class="badge badge-done">Selesai</span></td><td><button class="btn btn-outline btn-xs">Riwayat</button></td></tr>
+              <tr><td><strong>Alya Fitria</strong><br><span style="font-size:0.75rem;color:var(--slate);">alya@email.com</span></td><td>Karyawan Baru</td><td>2</td><td>10 Mar 2025</td><td><span class="badge badge-done">Selesai</span></td><td><button class="btn btn-outline btn-xs">Riwayat</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PENDAPATAN ===== -->
+    <div class="page" id="page-pendapatan">
+      <div style="margin-bottom:1.5rem;">
+        <h2 style="font-size:1.3rem;font-weight:800;">Pendapatan</h2>
+        <p style="color:var(--slate);font-size:0.875rem;">Ringkasan keuangan dari sesi konsultasi</p>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">Bulan Ini</div><div class="stat-value" style="color:var(--teal);">Rp 1,8jt</div><div class="stat-trend trend-up">↑ 23% dari bulan lalu</div></div>
+        <div class="stat-card"><div class="stat-label">Bulan Lalu</div><div class="stat-value" style="color:var(--navy);">Rp 1,46jt</div><div class="stat-sub">10 sesi selesai</div></div>
+        <div class="stat-card"><div class="stat-label">Total Sepanjang Karir</div><div class="stat-value" style="color:var(--blue);">Rp 24,3jt</div><div class="stat-sub">247 sesi selesai</div></div>
+        <div class="stat-card"><div class="stat-label">Menunggu Pencairan</div><div class="stat-value" style="color:var(--amber);">Rp 315rb</div><div class="stat-sub">2 sesi belum dicairkan</div></div>
+      </div>
+      <div class="card" style="margin-bottom:1.5rem;">
+        <div class="card-title"><div class="card-title-left">💰 Pendapatan per Paket — Bulan Ini</div></div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div><div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:5px;"><span><strong>Basic</strong> — 4 sesi × Rp 45.000</span><span style="font-weight:700;">Rp 180.000</span></div><div class="earn-bar"><div class="earn-fill" style="width:25%;background:var(--blue);"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:5px;"><span><strong>Standard</strong> — 7 sesi × Rp 135.000</span><span style="font-weight:700;">Rp 945.000</span></div><div class="earn-bar"><div class="earn-fill" style="width:60%;"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:5px;"><span><strong>Premium</strong> — 2 sesi × Rp 315.000</span><span style="font-weight:700;">Rp 630.000</span></div><div class="earn-bar"><div class="earn-fill" style="width:45%;background:var(--rose);"></div></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><div class="card-title-left">📋 Riwayat Pencairan</div></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Tanggal</th><th>Jumlah</th><th>Bank</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>1 Mar 2025</td><td style="font-weight:700;color:var(--teal);">Rp 1.462.500</td><td>BCA — 1234567890</td><td><span class="badge badge-done">Berhasil</span></td></tr>
+              <tr><td>1 Feb 2025</td><td style="font-weight:700;color:var(--teal);">Rp 1.125.000</td><td>BCA — 1234567890</td><td><span class="badge badge-done">Berhasil</span></td></tr>
+              <tr><td>1 Jan 2025</td><td style="font-weight:700;color:var(--teal);">Rp 990.000</td><td>BCA — 1234567890</td><td><span class="badge badge-done">Berhasil</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== LISTING ===== -->
+    <div class="page" id="page-listing">
+      <div style="margin-bottom:1.5rem;">
+        <h2 style="font-size:1.3rem;font-weight:800;">Status Listing</h2>
+        <p style="color:var(--slate);font-size:0.875rem;">Kelola status profil Anda di platform EzTax</p>
+      </div>
+      <div class="alert alert-warn">⚠️ Listing Anda berakhir dalam <strong>7 hari</strong>. Perpanjang sebelum 1 April 2025 agar profil tidak dinonaktifkan.</div>
+      <div class="card" style="margin-bottom:1.5rem;">
+        <div class="card-title"><div class="card-title-left">🏷️ Detail Listing Aktif</div></div>
+        <div style="display:flex;flex-direction:column;gap:12px;font-size:0.875rem;">
+          <div style="display:flex;justify-content:space-between;"><span style="color:var(--slate);">Status</span><span class="badge badge-active">✅ Aktif & Terverifikasi</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:var(--slate);">Mulai berlaku</span><span style="font-weight:600;">1 Maret 2025</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:var(--slate);">Berakhir</span><span style="font-weight:600;color:var(--amber);">1 April 2025 (7 hari lagi)</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:var(--slate);">Paket aktif</span><span style="font-weight:600;">Basic + Standard</span></div>
+          <div style="display:flex;justify-content:space-between;"><span style="color:var(--slate);">Posisi di direktori</span><span style="font-weight:600;">#3 dari 350 konsultan</span></div>
+        </div>
+        <div class="divider"></div>
+        <div style="background:var(--gray-100);border-radius:var(--radius-md);padding:1.25rem;margin-bottom:1.25rem;">
+          <div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:6px;"><span>Listing Fee (1 bulan)</span><span style="font-weight:700;">Rp 299.000</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:6px;color:var(--slate);"><span>PPN 11%</span><span>Rp 32.890</span></div>
+          <div class="divider" style="margin:8px 0;"></div>
+          <div style="display:flex;justify-content:space-between;font-weight:800;"><span>Total Perpanjangan</span><span style="color:var(--teal);">Rp 331.890</span></div>
+        </div>
+        <div class="form-group"><label>Metode Pembayaran</label><select><option>QRIS</option><option>Transfer BCA</option><option>Transfer BRI</option></select></div>
+        <button class="btn btn-primary" onclick="alert('Perpanjangan berhasil! Listing aktif hingga 1 Mei 2025.')">Perpanjang Listing Sekarang</button>
+      </div>
+    </div>
+
+    <!-- ===== PROFIL ===== -->
+    <div class="page" id="page-profil">
+      <div style="margin-bottom:1.5rem;">
+        <h2 style="font-size:1.3rem;font-weight:800;">Profil Saya</h2>
+        <p style="color:var(--slate);font-size:0.875rem;">Kelola informasi yang tampil kepada calon klien</p>
+      </div>
+      <div class="profile-banner">
+        <div class="profile-avatar">AR</div>
+        <div class="profile-info">
+          <h2>Ardi Rahman, S.E., BKP</h2>
+          <p>Konsultan Pajak Bersertifikat — Brevet B | IKPI 2016</p>
+          <div class="profile-meta">
+            <span>⭐ 4.9 (128 ulasan)</span>
+            <span>📋 247 sesi selesai</span>
+            <span>⚡ Respons &lt;20 mnt</span>
+            <span>🟢 Online</span>
+          </div>
+        </div>
+        <div style="margin-left:auto;"><button class="btn btn-outline btn-sm" style="color:white;border-color:rgba(255,255,255,0.4);" onclick="alert('Mode edit profil')">✏️ Edit Profil</button></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+        <div class="card">
+          <div class="card-title"><div class="card-title-left">👤 Informasi Dasar</div><button class="btn btn-outline btn-xs" onclick="alert('Edit info')">Edit</button></div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:0.875rem;">
+            <div><div style="font-size:0.72rem;color:var(--slate);margin-bottom:2px;">Nama Lengkap</div><div style="font-weight:600;">Ardi Rahman, S.E., BKP</div></div>
+            <div><div style="font-size:0.72rem;color:var(--slate);margin-bottom:2px;">Email</div><div>ardi@konsultan.com</div></div>
+            <div><div style="font-size:0.72rem;color:var(--slate);margin-bottom:2px;">No. HP</div><div>0812-3456-7890</div></div>
+            <div><div style="font-size:0.72rem;color:var(--slate);margin-bottom:2px;">Spesialisasi</div><div style="font-weight:600;">PPh Orang Pribadi, SPT, Freelancer, Coretax</div></div>
+            <div><div style="font-size:0.72rem;color:var(--slate);margin-bottom:2px;">Bio</div><div style="color:var(--slate);">Konsultan pajak dengan pengalaman 9 tahun membantu wajib pajak orang pribadi dan UMKM...</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><div class="card-title-left">🎓 Sertifikasi</div></div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="padding:10px;background:var(--teal-pale);border-radius:var(--radius-sm);border:1px solid var(--teal-light);">
+              <div style="font-size:0.78rem;font-weight:700;color:var(--teal);">✅ Brevet B — IKPI, 2016</div>
+              <div style="font-size:0.75rem;color:var(--slate);margin-top:2px;">Terverifikasi oleh tim EzTax</div>
+            </div>
+            <div style="padding:10px;background:var(--green-light);border-radius:var(--radius-sm);border:1px solid #BBF7D0;">
+              <div style="font-size:0.78rem;font-weight:700;color:var(--green);">✅ Brevet A — IAI, 2015</div>
+              <div style="font-size:0.75rem;color:var(--slate);margin-top:2px;">Terverifikasi oleh tim EzTax</div>
+            </div>
+            <div style="font-size:0.78rem;color:var(--slate);padding:8px;"><strong>Pengalaman:</strong> 9 tahun di bidang perpajakan orang pribadi dan UMKM</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ULASAN ===== -->
+    <div class="page" id="page-ulasan">
+      <div style="margin-bottom:1.5rem;">
+        <h2 style="font-size:1.3rem;font-weight:800;">Ulasan Klien</h2>
+        <p style="color:var(--slate);font-size:0.875rem;">Feedback dari klien yang pernah berkonsultasi</p>
+      </div>
+      <div style="display:grid;grid-template-columns:200px 1fr;gap:1.25rem;align-items:start;">
+        <div class="card" style="text-align:center;">
+          <div style="font-family:'Sora',sans-serif;font-size:3rem;font-weight:800;color:var(--gold);">4.9</div>
+          <div style="color:var(--gold);font-size:1.25rem;margin-bottom:4px;">★★★★★</div>
+          <div style="font-size:0.8rem;color:var(--slate);">128 ulasan total</div>
+          <div class="divider"></div>
+          <div style="font-size:0.78rem;display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;align-items:center;gap:6px;"><span>5★</span><div class="earn-bar" style="flex:1;"><div class="earn-fill" style="width:88%;"></div></div><span>88%</span></div>
+            <div style="display:flex;align-items:center;gap:6px;"><span>4★</span><div class="earn-bar" style="flex:1;"><div class="earn-fill" style="width:10%;background:var(--blue);"></div></div><span>10%</span></div>
+            <div style="display:flex;align-items:center;gap:6px;"><span>3★</span><div class="earn-bar" style="flex:1;"><div class="earn-fill" style="width:2%;background:var(--amber);"></div></div><span>2%</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="review-item"><div class="review-top"><span class="review-name">Budi Santoso</span><span class="review-stars">★★★★★</span></div><p class="review-text">Pak Ardi sangat sabar menjelaskan perbedaan formulir 1770 dan 1770S. Masalah saya selesai dalam 1 jam!</p><span style="font-size:0.72rem;color:var(--slate);">18 Mar 2025 • Standard</span></div>
+          <div class="review-item"><div class="review-top"><span class="review-name">Rina Mayasari</span><span class="review-stars">★★★★★</span></div><p class="review-text">Recommended banget! Cepat respons dan penjelasannya mudah dipahami walau saya awam soal pajak.</p><span style="font-size:0.72rem;color:var(--slate);">17 Mar 2025 • Standard</span></div>
+          <div class="review-item"><div class="review-top"><span class="review-name">Alya Fitria</span><span class="review-stars">★★★★</span></div><p class="review-text">Pas banget buat yang baru pertama kali lapor pajak! Penjelasannya mudah dimengerti.</p><span style="font-size:0.72rem;color:var(--slate);">10 Mar 2025 • Standard</span></div>
+          <div class="review-item"><div class="review-top"><span class="review-name">PT Maju Jaya</span><span class="review-stars">★★★★★</span></div><p class="review-text">Profesional dan sangat membantu untuk kasus transfer pricing kami. Luar biasa!</p><span style="font-size:0.72rem;color:var(--slate);">13 Mar 2025 • Premium</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .main -->
+</div><!-- end .app-layout -->
+</div><!-- end #main-app -->
+
+<script>
+let isOnline = true;
+
+function doLogin(){ document.getElementById('login-screen').style.display='none'; document.getElementById('main-app').style.display='block'; }
+function doLogout(){ document.getElementById('main-app').style.display='none'; document.getElementById('login-screen').style.display='block'; }
+function showReg(){ document.getElementById('login-screen').style.display='none'; document.getElementById('reg-screen').style.display='block'; }
+function showLogin(){ document.getElementById('reg-screen').style.display='none'; document.getElementById('login-screen').style.display='block'; }
+function finishReg(){ alert('🎉 Pendaftaran berhasil! Tim EzTax akan memverifikasi dokumen Anda dalam 1–3 hari kerja.'); document.getElementById('reg-screen').style.display='none'; document.getElementById('login-screen').style.display='block'; }
+
+function regStep(n){
+  for(let i=1;i<=4;i++){
+    const el=document.getElementById('reg'+i); if(el) el.style.display=i===n?'block':'none';
+    const s=document.getElementById('rs'+i); if(s) s.className='reg-step'+(i<n?' done':i===n?' active':'');
+  }
+}
+
+function showPage(pg){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+pg).classList.add('active');
+  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
+  const sb=document.getElementById('sb-'+pg); if(sb) sb.classList.add('active');
+  window.scrollTo(0,0);
+  document.getElementById('sidebar').classList.remove('mobile-open');
+}
+
+function toggleOnline(){
+  isOnline=!isOnline;
+  document.getElementById('online-toggle').className='toggle'+(isOnline?'':' off');
+  document.getElementById('online-label').textContent=isOnline?'Online':'Offline';
+}
+
+function toggleNotif(){ document.getElementById('notif-drop').classList.toggle('open'); }
+document.addEventListener('click',e=>{ if(!e.target.closest('#notif-drop')&&!e.target.closest('.notif-btn')) document.getElementById('notif-drop').classList.remove('open'); });
+
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('mobile-open'); }
+
+function switchChat(init,name,color,paket){
+  document.getElementById('ch-av').textContent=init;
+  document.getElementById('ch-av').style.background=color;
+  document.getElementById('ch-name').textContent=name;
+  document.getElementById('ch-paket').textContent='• '+paket;
+  document.querySelectorAll('.chat-contact').forEach(c=>c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+function kirimChat(){
+  const inp=document.getElementById('chat-inp');
+  const txt=inp.value.trim(); if(!txt) return;
+  const box=document.getElementById('chat-msgs');
+  const d=document.createElement('div');
+  const now=new Date();
+  d.className='msg msg-me';
+  d.innerHTML=txt+'<span class="msg-time">'+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+'</span>';
+  box.appendChild(d); box.scrollTop=box.scrollHeight; inp.value='';
+}
+</script>
+</body>
+</html>
